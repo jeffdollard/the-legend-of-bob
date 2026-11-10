@@ -15,6 +15,9 @@
 - `node tools/test-combat.js`: weak-spot rules, sword, bot kill, damage/armor math.
 - `tools/load.js` concatenates `js/*.js` into a Node vm context. Files must stay DOM-free at load time (sprites build in `buildSprites()`, called from `Game.init`).
 
+## Git
+- When asked to commit, commit on a short branch and merge it into `master` right away, then delete the branch (standing approval). Nothing is pushed; there is no remote.
+
 ## Architecture
 Scripts load in the order in `index.html` and share globals.
 - `config.js`: constants, tile ids, keymap. `VIEW_W`/`VIEW_H` are `let`s: `Game.fit()` scales a 256×240 box to fit the window, then grows the view in the longer direction so there are never bars (fractional CSS scale). Menus are laid out in a centered 256×240 box (`UI_W`/`UI_H`). Playwright's `browser_resize` forces the page size and can make the real window look wrong.
