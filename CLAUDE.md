@@ -17,7 +17,7 @@
 
 ## Architecture
 Scripts load in the order in `index.html` and share globals.
-- `config.js`: constants, tile ids, keymap. `VIEW_W` is a `let`: `Game.fit()` sets it from the window's shape (256–480 wide, always 240 tall, fractional CSS scale). Menus are laid out in a centered 256-wide column (`UI_W`).
+- `config.js`: constants, tile ids, keymap. `VIEW_W`/`VIEW_H` are `let`s: `Game.fit()` scales a 256×240 box to fit the window, then grows the view in the longer direction so there are never bars (fractional CSS scale). Menus are laid out in a centered 256×240 box (`UI_W`/`UI_H`). Playwright's `browser_resize` forces the page size and can make the real window look wrong.
 - `rng.js`: seeded PRNG + value noise.
 - `worldgen.js`: `generateLayout(seed)` builds a structure map (tunnels, cave, seal, mesa) over noise terrain (`baseTile`). Also places spawns, chests and bots.
 - `world.js`: lazy 32×32 chunks holding live tiles + a reveal mask. Restart = `new World(layout)`.

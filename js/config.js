@@ -2,11 +2,10 @@
 'use strict';
 
 const TILE = 16;
-// View is VIEW_H tall; its width follows the window's shape (Game.fit), between UI_W and VIEW_MAX_W.
-const VIEW_H = 240;
-const UI_W = 256;          // menus and panels are laid out in a 256-wide column, centered
-const VIEW_MAX_W = 480;    // wider windows get side bars
-let VIEW_W = UI_W;
+// The view fills the window: at least UI_W x UI_H game pixels, growing in whichever
+// direction the window is longer (Game.fit). Menus are laid out in a centered UI_W x UI_H box.
+const UI_W = 256, UI_H = 240;
+let VIEW_W = UI_W, VIEW_H = UI_H;
 
 // Tile ids
 const T = { AIR: 0, GRASS: 1, DIRT: 2, STONE: 3, SEAL: 4, MARKER: 5, WALL: 6 };

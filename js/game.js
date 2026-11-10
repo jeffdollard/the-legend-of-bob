@@ -52,18 +52,19 @@ const Game = {
     requestAnimationFrame(loop);
   },
 
-  // Fill the window: height scales to fit, width widens to match the window's shape.
+  // Fill the window with no bars: scale so a UI_W x UI_H box fits, then grow the view to the window's shape.
   fit() {
-    const s = Math.min(innerHeight / VIEW_H, innerWidth / UI_W);
-    const w = Math.max(UI_W, Math.min(VIEW_MAX_W, Math.round(innerWidth / s)));
-    if (w !== VIEW_W || this.canvas.width !== w) {
-      VIEW_W = w;
-      this.canvas.width = w;                  // resizing resets context state
+    const W = innerWidth, H = innerHeight;
+    const s = Math.min(W / UI_W, H / UI_H);
+    const w = Math.max(UI_W, Math.round(W / s)), h = Math.max(UI_H, Math.round(H / s));
+    if (w !== VIEW_W || h !== VIEW_H || this.canvas.width !== w || this.canvas.height !== h) {
+      VIEW_W = w; VIEW_H = h;
+      this.canvas.width = w; this.canvas.height = h;   // resizing resets context state
       this.ctx.imageSmoothingEnabled = false;
       if (this.world) this.clampCamera();
     }
-    this.canvas.style.width = Math.round(VIEW_W * s) + 'px';
-    this.canvas.style.height = Math.round(VIEW_H * s) + 'px';
+    this.canvas.style.width = W + 'px';
+    this.canvas.style.height = H + 'px';
   },
 
   toggleMute() {
@@ -184,7 +185,7 @@ const Game = {
     p.update(this);
 
     for (const b of this.bots) {
-      if (Math.abs(b.x - p.x) > 26 * TILE || Math.abs(b.y - p.y) > 18 * TILE) continue;
+      if (Math.abs(b.x - p.x) > Math.max(26 * TILE, VIEW_W / 2 + 6 * TILE) || Math.abs(b.y - p.y) > Math.max(18 * TILE, VIEW_H / 2 + 6 * TILE)) continue;
       b.update(this);
       if (!b.dead && overlaps(b, p)) p.hurt(CFG.DMG_BOT, b.cx, this);
     }
@@ -280,7 +281,7 @@ const Game = {
     if (this.state === 'title') { this.drawTitle(ctx); drawMuteButton(ctx); return; }
     this.drawWorld(ctx);
     drawHUD(ctx, this);
-    ctx.save(); ctx.translate((VIEW_W - UI_W) >> 1, 0);   // menus sit in a centered 256-wide column
+    ctx.save(); ctx.translate((VIEW_W - UI_W) >> 1, (VIEW_H - UI_H) >> 1);   // menus sit in a centered 256x240 box
     if (this.state === 'pause') this.drawPause(ctx);
     if (this.state === 'dead') this.drawDead(ctx);
     if (this.state === 'win') this.drawWin(ctx);
@@ -303,7 +304,7 @@ const Game = {
   drawBackground(ctx, cam) {
     const mw = SPR.mountains.width;
     const off = -Math.floor(cam.x * 0.25) % mw;
-    const my = this.state === 'title' ? 110 : Math.round(this.horizonY(cam) - 80 - cam.y);
+    const my = this.state === 'title' ? 110 + ((VIEW_H - UI_H) >> 1) : Math.round(this.horizonY(cam) - 80 - cam.y);
     if (my < VIEW_H && my + 96 > 0) for (let x = off - mw; x < VIEW_W; x += mw) ctx.drawImage(SPR.mountains, x, my);
     for (const cl of this.clouds) {
       const span = 2000;
@@ -427,18 +428,19 @@ const Game = {
   drawTitle(ctx) {
     const cam = { x: this.frame * 0.4, y: CFG.SURFACE_BASE * TILE - 170 };
     this.drawBackground(ctx, cam);
+    const oy = (VIEW_H - UI_H) >> 1;   // the 256x240 layout is centered vertically; ground fills below
     for (let x = 0; x < VIEW_W; x += TILE) {
-      ctx.drawImage(SPR.tile[T.GRASS], x, 200);
-      ctx.drawImage(SPR.tile[T.DIRT], x, 216); ctx.drawImage(SPR.tile[T.DIRT], x, 232);
+      ctx.drawImage(SPR.tile[T.GRASS], x, oy + 200);
+      for (let y = oy + 216; y < VIEW_H; y += TILE) ctx.drawImage(SPR.tile[T.DIRT], x, y);
     }
     // characters spread across the full width; the boss stays at the right edge
     const bx = VIEW_W - 62;
-    ctx.drawImage(SPR.bob.stand.r, Math.round(VIEW_W * 0.22), 176);
-    ctx.drawImage(SPR.boss.stand, bx, 152);
-    ctx.drawImage(SPR.grenade, bx + 4 - 9, 156); ctx.drawImage(SPR.grenade, bx + 53 - 9, 156);
-    ctx.drawImage(SPR.bot[Math.floor(this.frame / 10) % 2].l, Math.round(VIEW_W * 0.47), 184);
-    ctx.drawImage(SPR.grenade, bx - 44, 176 + Math.round(Math.sin(this.frame / 15) * 4));
-    ctx.save(); ctx.translate((VIEW_W - UI_W) >> 1, 0);
+    ctx.drawImage(SPR.bob.stand.r, Math.round(VIEW_W * 0.22), oy + 176);
+    ctx.drawImage(SPR.boss.stand, bx, oy + 152);
+    ctx.drawImage(SPR.grenade, bx + 4 - 9, oy + 156); ctx.drawImage(SPR.grenade, bx + 53 - 9, oy + 156);
+    ctx.drawImage(SPR.bot[Math.floor(this.frame / 10) % 2].l, Math.round(VIEW_W * 0.47), oy + 184);
+    ctx.drawImage(SPR.grenade, bx - 44, oy + 176 + Math.round(Math.sin(this.frame / 15) * 4));
+    ctx.save(); ctx.translate((VIEW_W - UI_W) >> 1, oy);
     drawTextC(ctx, 'THE LEGEND', UI_W / 2, 16, '#fce890', 2, '#5c2808');
     drawTextC(ctx, 'OF BOB', UI_W / 2, 36, '#f87818', 3, '#5c2808');
     this.drawPanel(ctx, 40, 62, 176, 78);

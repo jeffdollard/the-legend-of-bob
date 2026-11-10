@@ -37,7 +37,7 @@ Drawn from the sketches (in code, `js/sprites.js`):
 - **Bob Boss**: red-outlined giant covered in "BOB", holding a "BOB" grenade up in each hand.
 
 ## Display and sound
-- The game fills the browser window: the view is always 15 tiles tall, and wider windows show more world to the sides (up to 30 tiles).
+- The game fills the browser window with no bars: at least 16×15 tiles are visible, and wider or taller windows show more world in that direction.
 - Mute: M, or click the speaker in the top-right corner.
 
 ## Death
