@@ -3,7 +3,7 @@
 The authority on game rules. Tuning numbers live in `js/config.js`.
 
 ## Goal
-Rescue **Bob 2** (above ground) and **Bob 3** (in an underground tunnel), then find and defeat the **Bob Boss** in his sealed cave deep underground. The cave seal crumbles only after both Bobs are saved.
+Rescue **Bob 2** (above ground) and **Bob 3** (in an underground tunnel), then find and defeat the **Bob Boss** in his sealed cave deep underground. The cave seal crumbles only after both Bobs are saved. Touching Bob 2 or Bob 3 rescues them: they sprout wings and fly to safety.
 
 ## World
 - Procedurally generated from a seed: fixed width (384 tiles, walls at the edges), unlimited depth.
@@ -14,6 +14,7 @@ Rescue **Bob 2** (above ground) and **Bob 3** (in an underground tunnel), then f
 - The boss cave is walled by undiggable **seal** blocks. When both Bobs are saved, the door blocks become air and the rest of the seal turns to stone.
 
 ## Bob
+- Controls are left-hand-centric because the right hand is on the arrows: D dig, Space jump, E place, F punch, Q switch material, Esc pause, M mute.
 - 3 hearts (tracked in quarter-hearts). Jump is 2.5 blocks (40px) at full hold; a tap gives a short hop. Mario-like acceleration, friction, coyote time and jump buffer.
 - **Dig** (hold D): sideways clears both rows of his body; ↑/↓ digs up/down. Grass and dirt yield dirt; stone yields stone. No inventory cap.
 - **Climb**: holding ↑ in any 1-wide shaft (or under one, within reach) climbs it, and he hops out onto the ledge at the top. Without ↑ he hangs; ↓ climbs down. ↑+D digs upward and he climbs into the hole, so he can always tunnel back up. 2-wide shafts can't be climbed; build to get out of those.
@@ -37,8 +38,15 @@ Drawn from the sketches (in code, `js/sprites.js`):
 - **Bob Boss**: red-outlined giant covered in "BOB", holding a "BOB" grenade up in each hand.
 
 ## Display and sound
+- 8-bit look: 16px tiles, NES-style palette, 256×240 base view. No forced scrolling; the camera follows Bob.
+- Original synthesized chiptune (a main theme and a faster boss theme) and sound effects. No audio files.
 - The game fills the browser window with no bars: at least 16×15 tiles are visible, and wider or taller windows show more world in that direction.
 - Mute: M, or click the speaker in the top-right corner.
 
 ## Death
 Restart the level: same world, terrain reset, inventory lost (materials, sword, armor), rescues reset. A new world comes only from the title screen.
+
+## Later / open
+- More enemy types later. The bob-bot is the only enemy for now.
+- Tile art (grass, dirt, stone) is still placeholder; no sketches yet.
+- GitHub Pages hosting is undecided. It makes the repo public, so it needs Jeff's explicit yes.
