@@ -11,11 +11,10 @@ class World {
     this.chunks = new Map();
     this.sealed = true;
     this.revealAll = false;
-    // reveal BFS scratch
-    const R = CFG.REVEAL_RADIUS, D = 2 * R + 1;
-    this._seen = new Int32Array(D * D);
+    // reveal BFS scratch (grown in reveal() when the view gets bigger)
+    this._seen = new Int32Array(0);
     this._stamp = 0;
-    this._queue = new Int32Array(D * D * 2);
+    this._queue = new Int32Array(0);
   }
 
   _chunk(cx, cy) {
@@ -62,16 +61,23 @@ class World {
   disguise(x, y) { return baseMaterial(this.L, x, y); }
 
   // Flood-fill through open cells around (tx,ty), marking them revealed.
+  // The box covers the whole view (which grows with the window) so tunnels never pop in on screen.
   reveal(tx, ty) {
-    const R = CFG.REVEAL_RADIUS, D = 2 * R + 1;
+    const RX = Math.max(CFG.REVEAL_RADIUS, Math.ceil(VIEW_W / 2 / TILE) + CFG.REVEAL_MARGIN);
+    const RY = Math.max(CFG.REVEAL_RADIUS, Math.ceil(VIEW_H * 0.55 / TILE) + CFG.REVEAL_MARGIN);
+    const DX = 2 * RX + 1, DY = 2 * RY + 1;
     if (this.solid(tx, ty)) return;
+    if (this._seen.length < DX * DY) {
+      this._seen = new Int32Array(DX * DY);
+      this._queue = new Int32Array(DX * DY * 2);
+    }
     const seen = this._seen, q = this._queue;
     const stamp = ++this._stamp;
     let head = 0, tail = 0;
     const visit = (x, y) => {
-      const lx = x - tx + R, ly = y - ty + R;
-      if (lx < 0 || ly < 0 || lx >= D || ly >= D) return;
-      const i = ly * D + lx;
+      const lx = x - tx + RX, ly = y - ty + RY;
+      if (lx < 0 || ly < 0 || lx >= DX || ly >= DY) return;
+      const i = ly * DX + lx;
       if (seen[i] === stamp) return;
       seen[i] = stamp;
       if (this.solid(x, y)) return;

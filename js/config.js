@@ -36,7 +36,8 @@ const CFG = {
   SURFACE_BOTS: 10,
   TUNNEL_BOTS: 2,        // per tunnel
   CHESTS_PER_TUNNEL: 2,
-  REVEAL_RADIUS: 12,
+  REVEAL_RADIUS: 12,     // min flood-fill reveal half-size (tiles); grows to cover the view
+  REVEAL_MARGIN: 4,      // extra tiles past the view edge (camera lag)
 
   // Player physics (px per frame at 60fps)
   P_W: 12, P_H: 22,
