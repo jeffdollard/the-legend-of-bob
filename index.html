@@ -2,11 +2,18 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="theme-color" content="#000000">
   <title>The Legend of Bob</title>
   <link rel="icon" href="data:,">
   <style>
     html, body { margin: 0; height: 100%; background: #000; overflow: hidden; }
+    /* touch: no scrolling, zooming, pull-to-refresh, text selection, long-press callout or tap flash */
+    html, body, canvas { touch-action: none; overscroll-behavior: none; user-select: none; -webkit-user-select: none;
+      -webkit-touch-callout: none; -webkit-tap-highlight-color: transparent; }
     body { display: flex; align-items: center; justify-content: center; }
     canvas { image-rendering: crisp-edges; image-rendering: pixelated; display: block; }
   </style>
@@ -19,6 +26,7 @@
   <script src="js/world.js"></script>
   <script src="js/physics.js"></script>
   <script src="js/input.js"></script>
+  <script src="js/touch.js"></script>
   <script src="js/audio.js"></script>
   <script src="js/sprites.js"></script>
   <script src="js/player.js"></script>

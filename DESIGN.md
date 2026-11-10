@@ -15,6 +15,7 @@ Rescue **Bob 2** (above ground) and **Bob 3** (in an underground tunnel), then f
 
 ## Bob
 - Controls are left-hand-centric because the right hand is on the arrows: D dig, Space jump, E place, F punch, Q switch material, Esc pause, M mute.
+- **Touch** (phones and tablets): a d-pad on the left. On the right is a diamond of JUMP (bottom), PUNCH (left), PLACE (right) and DIG (top), with a small SWAP for materials. Pause sits under the mute speaker, and in menus you tap anywhere. The d-pad favors straight directions so walking doesn't leak an ↑, which would start a climb or turn a dig upward. The overlay shows only on mobile devices (touch is the main input and nothing hovers), never on desktops or touchscreen laptops. On mobile, a key press hides it and the next touch brings it back. Both orientations work.
 - 3 hearts (tracked in quarter-hearts). Jump is 2.5 blocks (40px) at full hold; a tap gives a short hop. Mario-like acceleration, friction, coyote time and jump buffer.
 - **Dig** (hold D): sideways clears both rows of his body; ↑/↓ digs up/down. Grass and dirt yield dirt; stone yields stone. No inventory cap.
 - **Climb**: holding ↑ in any 1-wide shaft (or under one, within reach) climbs it, and he hops out onto the ledge at the top. Without ↑ he hangs; ↓ climbs down. ↑+D digs upward and he climbs into the hole, so he can always tunnel back up. 2-wide shafts can't be climbed; build to get out of those.

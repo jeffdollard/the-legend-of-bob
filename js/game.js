@@ -15,6 +15,7 @@ const Game = {
   input: Input,
   clouds: [],
   fps: 0, _fpsT: 0, _fpsN: 0,
+  scale: 1,           // CSS px per game px
 
   init() {
     const q = new URLSearchParams(location.search);
@@ -24,19 +25,33 @@ const Game = {
     this.ctx = this.canvas.getContext('2d');
     this.ctx.imageSmoothingEnabled = false;
     buildSprites();
+    Touch.init(this, q.get('touch') === '1');
     Input.attach(window);
-    Input.onAnyKey = () => {
-      if (AudioSys.ensure() && this.state === 'title' && !AudioSys.track) AudioSys.playMusic('main');
-    };
+    Input.onAnyKey = (name) => { this.wake(); if (name) Touch.keyboardUsed(); };
     addEventListener('resize', () => this.fit()); this.fit();
-    // mute button: map the pointer to game pixels
+    // Pointers: touch controls when they're on, otherwise just the mute button. Map to game pixels.
+    const c = this.canvas;
     const toGame = (e) => {
-      const r = this.canvas.getBoundingClientRect();
+      const r = c.getBoundingClientRect();
       return [(e.clientX - r.left) * VIEW_W / r.width, (e.clientY - r.top) * VIEW_H / r.height];
     };
-    this.canvas.addEventListener('pointerdown', (e) => { if (muteButtonHit(...toGame(e))) this.toggleMute(); });
-    this.canvas.addEventListener('pointermove', (e) => { this.canvas.style.cursor = muteButtonHit(...toGame(e)) ? 'pointer' : ''; });
-    addEventListener('blur', () => { if (this.state === 'play') this.state = 'pause'; });
+    c.addEventListener('pointerdown', (e) => {
+      if (e.pointerType === 'touch') Touch.enable();
+      if (e.pointerType === 'mouse') this.wake();   // a touch only counts as a user gesture on release
+      if (Touch.enabled) Touch.down(e.pointerId, ...toGame(e));
+      else if (muteButtonHit(...toGame(e))) this.toggleMute();
+    });
+    c.addEventListener('pointermove', (e) => {
+      if (Touch.enabled) { Touch.move(e.pointerId, ...toGame(e)); c.style.cursor = ''; }
+      else c.style.cursor = muteButtonHit(...toGame(e)) ? 'pointer' : '';
+    });
+    c.addEventListener('pointerup', (e) => { this.wake(); Touch.up(e.pointerId, false); });
+    c.addEventListener('pointercancel', (e) => Touch.up(e.pointerId, true));
+    c.addEventListener('touchend', () => this.wake());   // iOS unlocks audio on touchend
+    c.addEventListener('contextmenu', (e) => e.preventDefault());
+    const suspend = () => { Touch.reset(); if (this.state === 'play') this.state = 'pause'; };
+    addEventListener('blur', suspend);
+    document.addEventListener('visibilitychange', () => { if (document.hidden) suspend(); });
     for (let i = 0; i < 40; i++) this.clouds.push({ x: Math.random() * 2000, r: Math.random() });
     let last = performance.now(), acc = 0;
     const loop = (now) => {
@@ -65,6 +80,13 @@ const Game = {
     }
     this.canvas.style.width = W + 'px';
     this.canvas.style.height = H + 'px';
+    this.scale = W / VIEW_W;
+    Touch.layout(VIEW_W, VIEW_H, this.scale);
+  },
+
+  // Called from key presses and taps (user gestures): unlock audio and start the title music
+  wake() {
+    if (AudioSys.ensure() && this.state === 'title' && !AudioSys.track) AudioSys.playMusic('main');
   },
 
   toggleMute() {
@@ -281,6 +303,7 @@ const Game = {
     if (this.state === 'title') { this.drawTitle(ctx); drawMuteButton(ctx); return; }
     this.drawWorld(ctx);
     drawHUD(ctx, this);
+    if (this.state === 'play') Touch.draw(ctx, this);
     ctx.save(); ctx.translate((VIEW_W - UI_W) >> 1, (VIEW_H - UI_H) >> 1);   // menus sit in a centered 256x240 box
     if (this.state === 'pause') this.drawPause(ctx);
     if (this.state === 'dead') this.drawDead(ctx);
@@ -415,6 +438,7 @@ const Game = {
   },
 
   drawControls(ctx, y) {
+    if (Touch.enabled) return this.drawTouchControls(ctx, y);
     const rows = [
       ['ARROWS', 'MOVE / AIM / CLIMB'], ['SPACE', 'JUMP'], ['D', 'DIG (UP+D = DIG UP)'], ['E', 'PLACE BLOCK'],
       ['F', 'PUNCH / UPPERCUT'], ['Q', 'SWITCH MATERIAL'], ['ESC', 'PAUSE    M  MUTE'],
@@ -423,6 +447,24 @@ const Game = {
       drawText(ctx, k, 48, y + i * 10, '#f8c020');
       drawText(ctx, v, 94, y + i * 10, '#fcfcfc');
     });
+  },
+
+  // Touch legend: each control's icon, then what it does
+  drawTouchControls(ctx, y) {
+    const rows = [
+      [SPR.iconDpad, 'MOVE / AIM / CLIMB'], [Touch.icon('jump', this), 'JUMP'],
+      [SPR.shovel, 'DIG (UP+DIG = DIG UP)'], [SPR.tile[T.DIRT], 'PLACE BLOCK'],
+      [Touch.icon('punch', this), 'PUNCH (UP = UPPERCUT)'], [Touch.icon('switch', this), 'SWITCH MATERIAL'],
+      [SPR.iconPause, 'PAUSE'],
+    ];
+    rows.forEach(([img, v], i) => {
+      const tile = img.width === TILE, w = tile ? 8 : img.width, h = tile ? 8 : img.height;   // tiles at half size
+      const yy = y + i * 10;
+      ctx.drawImage(img, 66 - w, yy + 3 - (h >> 1), w, h);   // right-aligned, centered on the text row
+      drawText(ctx, v, 74, yy, '#fcfcfc');
+    });
+    ctx.drawImage(SPR.soundOn, 140, y + 60 - 1);
+    drawText(ctx, 'MUTE', 154, y + 60, '#fcfcfc');
   },
 
   drawTitle(ctx) {
@@ -446,7 +488,7 @@ const Game = {
     this.drawPanel(ctx, 40, 62, 176, 78);
     this.drawControls(ctx, 68);
     drawTextC(ctx, 'SAVE BOB 2 AND BOB 3. DEFEAT THE BOB BOSS.', UI_W / 2, 145, '#fcfcfc');
-    if (Math.floor(this.frame / 30) % 2 === 0) drawTextC(ctx, 'PRESS SPACE TO START', UI_W / 2, 157, '#fce890');
+    if (Math.floor(this.frame / 30) % 2 === 0) drawTextC(ctx, Touch.enabled ? 'TAP TO START' : 'PRESS SPACE TO START', UI_W / 2, 157, '#fce890');
     ctx.restore();
   },
 
@@ -454,7 +496,7 @@ const Game = {
     this.drawPanel(ctx, 40, 50, 176, 110);
     drawTextC(ctx, 'PAUSED', UI_W / 2, 58, '#fce890', 2);
     this.drawControls(ctx, 80);
-    drawTextC(ctx, 'ESC TO RESUME', UI_W / 2, 150, '#bcbcbc');
+    drawTextC(ctx, Touch.enabled ? 'TAP TO RESUME' : 'ESC TO RESUME', UI_W / 2, 150, '#bcbcbc');
   },
 
   drawDead(ctx) {
@@ -463,7 +505,7 @@ const Game = {
     drawTextC(ctx, 'BOB IS DOWN!', UI_W / 2, 88, '#e83018', 2);
     drawTextC(ctx, 'THE LEVEL RESTARTS AND', UI_W / 2, 110, '#fcfcfc');
     drawTextC(ctx, 'YOUR INVENTORY IS LOST.', UI_W / 2, 120, '#fcfcfc');
-    if (this.stateT > 50 && Math.floor(this.frame / 30) % 2 === 0) drawTextC(ctx, 'PRESS SPACE', UI_W / 2, 132, '#fce890');
+    if (this.stateT > 50 && Math.floor(this.frame / 30) % 2 === 0) drawTextC(ctx, Touch.enabled ? 'TAP TO CONTINUE' : 'PRESS SPACE', UI_W / 2, 132, '#fce890');
   },
 
   drawWin(ctx) {
@@ -477,7 +519,7 @@ const Game = {
     drawText(ctx, `TIME        ${time}`, 60, 114, '#bcbcbc');
     drawText(ctx, `BLOCKS DUG  ${s.dug}`, 60, 124, '#bcbcbc');
     drawText(ctx, `BOTS BOPPED ${s.bots}`, 60, 134, '#bcbcbc');
-    if (this.stateT > 90 && Math.floor(this.frame / 30) % 2 === 0) drawTextC(ctx, 'PRESS SPACE', UI_W / 2, 154, '#fce890');
+    if (this.stateT > 90 && Math.floor(this.frame / 30) % 2 === 0) drawTextC(ctx, Touch.enabled ? 'TAP TO CONTINUE' : 'PRESS SPACE', UI_W / 2, 154, '#fce890');
   },
 
   drawDebug(ctx) {
@@ -488,7 +530,8 @@ const Game = {
       `1 BOB2 2 BOB3 3 DOOR 4 BOSS`,
       `5 GEAR 6 RESCUE G GOD V REVEAL`,
     ];
-    lines.forEach((l, i) => drawText(ctx, l, 4, VIEW_H - 40 + i * 9, '#90e870'));
+    const y0 = Touch.enabled ? Math.round(Touch.L.dpad.y - Touch.L.dpad.r) - 40 : VIEW_H - 40;   // above the d-pad
+    lines.forEach((l, i) => drawText(ctx, l, 4, y0 + i * 9, '#90e870'));
   },
 };
 

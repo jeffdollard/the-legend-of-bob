@@ -71,6 +71,25 @@ const CFG = {
   WEAK_SPOT: 8,          // weak spot square size, in the arch between the boss's legs
 };
 
+// Touch controls (phones/tablets). Sizes are CSS px; Touch.layout converts them to game px.
+const TOUCH = {
+  DPAD_R: 64,            // d-pad radius
+  DPAD_HIT: 1.5,         // a touch within this many radii of the center grabs the d-pad
+  DPAD_DEAD: 0.2,        // center dead zone, as a fraction of the radius
+  DPAD_V_MIN: 35,        // degrees above horizontal where up/down engage (higher = fewer accidental ups)
+  DPAD_H_MAX: 60,        // degrees above horizontal where left/right drop out
+  BTN_R: 30,             // action button radius
+  BTN_SPREAD: 1.5,       // diamond offset from the cluster center, in button radii
+  BTN_HIT: 1.3,          // button hit radius, in button radii
+  SMALL_R: 20,           // SWAP button radius
+  MARGIN: 20,            // from the left/right screen edges
+  MARGIN_BOTTOM: 24,     // from the bottom edge (clear of the home indicator)
+  CORNER: 44,            // mute/pause corner hit size
+  TOP_CLEAR: 48,         // game px kept clear at the top for the HUD, pause button and toasts
+  ALPHA: 0.55,           // control opacity (pressed controls are brighter)
+  FULLSCREEN: true,      // Android: go fullscreen when a tap starts the game
+};
+
 const KEYMAP = {
   ArrowLeft: 'left', ArrowRight: 'right', ArrowUp: 'up', ArrowDown: 'down',
   Space: 'jump', KeyD: 'dig', KeyE: 'place', KeyF: 'punch', KeyQ: 'switch',

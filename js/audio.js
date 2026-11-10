@@ -1,5 +1,5 @@
 // WebAudio chiptune: synthesized sound effects + a step-sequenced background track.
-// No audio files. Everything is a no-op until the first key press creates the AudioContext.
+// No audio files. Everything is a no-op until the first key press or tap creates the AudioContext.
 'use strict';
 
 const AudioSys = {
@@ -8,7 +8,8 @@ const AudioSys = {
   track: null, step: 0, nextTime: 0, timer: null,
 
   ensure() {
-    if (this.ctx) { if (this.ctx.state === 'suspended') this.ctx.resume(); return true; }
+    // iOS can also leave the context 'interrupted'; resume only works inside a user gesture
+    if (this.ctx) { if (this.ctx.state !== 'running') this.ctx.resume().catch(() => {}); return true; }
     const AC = typeof window !== 'undefined' && (window.AudioContext || window.webkitAudioContext);
     if (!AC) return false;
     const ctx = this.ctx = new AC();

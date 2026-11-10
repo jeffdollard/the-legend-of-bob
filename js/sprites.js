@@ -335,6 +335,12 @@ function buildSprites() {
   const wing = sprite(['.....www', '...wwwww', '.wwwwwwg', 'wwwwwgg.', 'wwwgg...', 'wg......']);
   SPR.wingR = [wing, flipV(wing)];
   SPR.wingL = SPR.wingR.map(flipH);
+  // touch control icons
+  SPR.iconJump = sprite(['...w...', '..www..', '.wwwww.', 'wwwwwww', '..www..', '..www..', '..www..']);
+  SPR.iconPause = sprite(['ww.ww', 'ww.ww', 'ww.ww', 'ww.ww', 'ww.ww', 'ww.ww', 'ww.ww']);
+  SPR.iconDig = rot90(sprite(['........ggg.', 'oooooooogggg', 'ooooooooGggg', '........GGG.']));   // shovel pointing down, light handle
+  SPR.iconSwap = sprite(['.....w..', 'wwwwwww.', '.....w..', '........', '..w.....', '.wwwwwww', '..w.....']);
+  SPR.iconDpad = sprite(['..ggg..', '..ggg..', 'ggggggg', 'ggggggg', 'ggggggg', '..ggg..', '..ggg..']);
   SPR.potion = sprite(['..kk..', '.kwwk.', '.kwwk.', 'krrrrk', 'krYrrk', 'krrrrk', '.kkkk.']);
 
   // "BOB" grenade: block letters from the font, red with a black outline
