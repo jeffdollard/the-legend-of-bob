@@ -1,14 +1,14 @@
 // node tools/test-worldgen.js [seedCount]
 // Checks, for many seeds, that generated worlds are playable:
 //  - 3+ tunnels; each one leads from its (dug-open) entrance to its seal door
-//  - Bob 3 and every chest are reachable through the tunnels
+//  - Bob 3 and every chest are reachable through the tunnels; every world has the sword, all 3 powerups and a health chest
 //  - the seal fully encloses the boss cave; after unsealing, the cave is reachable
 //  - Bob 2's mesa is taller than a jump
 // Reachability models Bob as a 1x2 agent that can fall, walk, and climb ledges up to 2 tiles.
 'use strict';
 const { loadGame } = require('./load');
 const G = loadGame(['config.js', 'rng.js', 'worldgen.js', 'world.js'],
-  ['T', 'SOLID', 'CFG', 'generateLayout', 'World']);
+  ['T', 'SOLID', 'CFG', 'generateLayout', 'World', 'CHEST_ITEMS']);
 const { T, CFG, generateLayout, World } = G;
 
 function reach(world, sx, sy, bounds) {
@@ -40,7 +40,7 @@ function reach(world, sx, sy, bounds) {
 
 const N = parseInt(process.argv[2] || '20', 10);
 let failures = 0;
-const stats = { tunnels: 0, chests: 0, bots: 0, caveFrac: 0, pathLen: 0 };
+const stats = { tunnels: 0, chests: 0, bots: 0, caveFrac: 0, pathLen: 0, minChests: Infinity };
 
 for (let s = 1; s <= N; s++) {
   const seed = s * 7919;
@@ -72,7 +72,13 @@ for (let s = 1; s <= N; s++) {
   if (!L.bob3) errs.push('no Bob 3');
   else if (!anyReach(L.bob3.x, L.bob3.y)) errs.push(`Bob 3 @${L.bob3.x},${L.bob3.y} unreachable`);
   L.chests.forEach(ch => { if (!anyReach(ch.x, ch.y)) errs.push(`chest(${ch.item}) @${ch.x},${ch.y} unreachable`); });
-  if (!L.chests.some(ch => ch.item === 'sword')) errs.push('no sword chest');
+  for (const item of ['sword', 'goldShovel', 'juice', 'shoes', 'health']) {
+    if (!L.chests.some(ch => ch.item === item)) errs.push(`no ${item} chest`);
+  }
+  const items = L.chests.map(ch => ch.item);
+  const count = (list, it) => list.filter(x => x === it).length;
+  if (G.CHEST_ITEMS.some(it => it !== 'health' && count(items, it) > count(G.CHEST_ITEMS, it))) errs.push('too many of a chest item');
+  stats.minChests = Math.min(stats.minChests, L.chests.length);
 
   // Seal encloses the cave: open-air flood from the cave interior stays inside it
   const inside = reach(world, c.cx, c.y1, { x0: c.x0 - 10, x1: c.x1 + 10, y0: c.y0 - 10, y1: c.floorY + 10 });
@@ -104,4 +110,5 @@ for (let s = 1; s <= N; s++) {
 console.log(`\n${N - failures}/${N} seeds OK`);
 console.log(`avg tunnels ${(stats.tunnels / N).toFixed(1)}, chests ${(stats.chests / N).toFixed(1)}, bots ${(stats.bots / N).toFixed(1)}, ` +
   `tunnel length ${(stats.pathLen / stats.tunnels).toFixed(0)} cells, underground air ${(100 * stats.caveFrac / N).toFixed(1)}%`);
+console.log(`min chests ${stats.minChests} (${G.CHEST_ITEMS.length} fixed items, the rest health)`);
 process.exit(failures ? 1 : 0);

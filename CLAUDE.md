@@ -7,12 +7,12 @@
 - Opening `index.html` directly should also work (classic scripts, no fetches), but `file://` hasn't been verified.
 - URL flags: `?seed=123` (fixed world), `?debug=1` (debug keys + overlay), `?touch=1` (force the touch controls on; the mouse drives them).
 - Phone testing: the server above listens on all interfaces, so open `http://<mac-lan-ip>:8765` on a phone on the same Wi-Fi.
-- Debug keys: `1` next to Bob 2, `2` next to Bob 3, `3` outside a cave door, `4` unseal + into the boss cave, `5` sword/armor/50 blocks, `6` rescue both, `G` god mode, `V` reveal all.
+- Debug keys: `1` next to Bob 2, `2` next to Bob 3, `3` outside a cave door, `4` unseal + into the boss cave, `5` sword/armor/powerups/50 blocks, `6` rescue both, `G` god mode, `V` reveal all.
 - `window.Game` and `Input.hold(name, bool)` / `Input.tap(name)` are exposed for scripted browser tests.
 
 ## Tests (Node, no deps)
-- `node tools/test-worldgen.js [seeds]`: playability over many seeds. Tunnels reach their doors, Bob 3 and chests are reachable, the seal is airtight, the cave is reachable after unseal, the mesa is taller than a jump. Reachability models Bob as a 1×2 agent.
-- `node tools/test-physics.js`: the real Player code. Jump apex 40px, ledge heights, dig/place behaviors.
+- `node tools/test-worldgen.js [seeds]`: playability over many seeds. Tunnels reach their doors, Bob 3 and chests are reachable, every world has the sword, all three powerups and a health chest, the seal is airtight, the cave is reachable after unseal, the mesa is taller than a jump. Reachability models Bob as a 1×2 agent.
+- `node tools/test-physics.js`: the real Player code. Jump apex 40px, ledge heights, dig/place behaviors, powerup multipliers.
 - `node tools/test-combat.js`: weak-spot rules, sword, bot kill, damage/armor math.
 - `node tools/test-touch.js`: touch layout at phone/tablet sizes (in bounds, no overlaps, finger-sized, clear of the HUD), hit-testing, d-pad wedges, and the Input bridge (one press per button-down, multi-touch, menu taps).
 - Browser touch tests: don't use `browser_resize`. In `browser_run_code_unsafe`, make an emulated context (`page.context().browser().newContext({ viewport, isMobile: true, hasTouch: true })`) and send multi-touch with CDP `Input.dispatchTouchEvent`. Close the context afterwards.

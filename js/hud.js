@@ -1,4 +1,4 @@
-// Heads-up display: hearts, armor, sword, material, rescue status, depth, toasts.
+// Heads-up display: hearts, armor, sword, powerups, material, rescue status, depth, toasts.
 'use strict';
 
 function drawHearts(ctx, x, y, quarters) {
@@ -22,9 +22,12 @@ function drawHUD(ctx, g) {
   let x = 34;
   if (p.armor > 0) { ctx.drawImage(SPR.shield, x, 3); drawText(ctx, String(p.armor), x + 9, 4, '#48c8f0'); x += 22; }
   if (p.sword) { ctx.drawImage(SPR.swordIcon, x, 3); x += 12; }
+  for (const [has, icon] of [[p.goldShovel, SPR.goldShovelIcon], [p.juice, SPR.juice], [p.shoes, SPR.shoes]]) {
+    if (has) { ctx.drawImage(icon, x, 3 + ((8 - icon.height) >> 1)); x += icon.width + 3; }
+  }
 
   // Materials: selected one highlighted
-  let mx = 96;
+  let mx = Math.max(96, x + 4);
   MATERIALS.forEach((m, i) => {
     const sel = i === p.matIdx;
     if (sel) { ctx.fillStyle = '#fcfcfc'; ctx.fillRect(mx - 1, 2, 10, 10); }

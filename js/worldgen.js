@@ -257,10 +257,10 @@ function generateLayout(seed) {
       }
     }
   }
-  // Contents: always 1 sword and up to 2 armor; the rest are health
+  // Contents: CHEST_ITEMS in priority order, shuffled across chests; the rest are health
   const order = L.chests.map((_, i) => i);
   for (let i = order.length - 1; i > 0; i--) { const j = ri(0, i); [order[i], order[j]] = [order[j], order[i]]; }
-  order.forEach((ci, n) => { L.chests[ci].item = n === 0 ? 'sword' : n <= 2 ? 'armor' : 'health'; });
+  order.forEach((ci, n) => { L.chests[ci].item = CHEST_ITEMS[n] || 'health'; });
 
   // ---- Surface bots ----
   for (let n = 0, tries = 0; n < CFG.SURFACE_BOTS && tries < 500; tries++) {

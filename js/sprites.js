@@ -90,8 +90,9 @@ const BOB_COLORS = {
   bob2:  { line: '#7c4818', fill: '#d4e6fa', letter: '#2858d8', tri: '#d82818', ring: '#20a030', num: '#8040c8' },
   bob3:  { line: '#7c4818', fill: '#ead8fa', letter: '#2858d8', tri: '#d82818', ring: '#20a030', num: '#8040c8' },
 };
+const BOB_LEG_LIFT = { stand: [0, 0], walkA: [1, 0], walkB: [0, 1], jump: [1, 1] };   // [left, right] in px
 function drawBob(x, o, C) {
-  const lift = { stand: [0, 0], walkA: [1, 0], walkB: [0, 1], jump: [1, 1] }[o.legs];
+  const lift = BOB_LEG_LIFT[o.legs];
   box(x, 4, 17 - lift[0], 6, 7, C.line, C.fill); miniText(x, o.num, 6, 18 - lift[0], C.num);
   box(x, 12, 17 - lift[1], 6, 7, C.line, C.fill); miniText(x, o.num, 13, 18 - lift[1], C.num);
   const punch = o.arm === 'punch' ? o.look : 0;
@@ -111,6 +112,7 @@ function bobFrames(kind, num) {
   const mk = (legs, arm) => ({
     r: canvasOf(BOB_W, BOB_H, x => drawBob(x, { legs, arm, look: 1, num }, C)),
     l: canvasOf(BOB_W, BOB_H, x => drawBob(x, { legs, arm, look: -1, num }, C)),
+    lift: BOB_LEG_LIFT[legs],
   });
   return {
     stand: mk('stand', 'up'), walk1: mk('walkA', 'up'), walk2: mk('walkB', 'up'), jump: mk('jump', 'up'),
@@ -328,10 +330,18 @@ function buildSprites() {
   SPR.swordUp = flipV(rot90(SPR.sword));
   SPR.swordDown = rot90(SPR.sword);
   SPR.fist = sprite(['.NNNN.', 'NTTTTN', 'NTTTTN', 'NTTTTN', 'NTTTTN', '.NNNN.'], { N: '#7c4818', T: '#f4dcb0' });
-  SPR.shovel = sprite(['........ggg.', 'nnnnnnnngggg', 'nnnnnnnnGggg', '........GGG.']);
-  SPR.shovelL = flipH(SPR.shovel);
-  SPR.shovelDown = rot90(SPR.shovel);
-  SPR.shovelUp = flipV(SPR.shovelDown);
+  // Shovel held while digging: r/l sideways, down, up. The golden shovel is the same shape in gold.
+  const shovelSet = map => {
+    const r = sprite(['........ggg.', 'nnnnnnnngggg', 'nnnnnnnnGggg', '........GGG.'], map), down = rot90(r);
+    return { r, l: flipH(r), down, up: flipV(down) };
+  };
+  SPR.plainShovel = shovelSet();
+  SPR.goldShovel = shovelSet({ g: 'y', G: '#b07c10' });
+  SPR.shovel = SPR.plainShovel.r;
+  // Powerup icons (HUD and chest pop): golden spade, green jumping juice, sneaker with lit-up sole
+  SPR.goldShovelIcon = sprite(['..y..', '.yYy.', 'yYyyy', 'yyyyD', '.yyD.', '..n..', '..n..', '.nnn.'], { D: '#b07c10' });
+  SPR.juice = sprite(['..nn..', '..kk..', '.kwwk.', 'kllllk', 'kwlllk', 'kllllk', 'kLLLLk', '.kkkk.'], { L: '#3cb030' });
+  SPR.shoes = sprite(['.kkk....', '.kwwk...', '.kwwwkk.', 'kwwwwwwk', 'krrlcyyk', '.kkkkkk.']);
   const wing = sprite(['.....www', '...wwwww', '.wwwwwwg', 'wwwwwgg.', 'wwwgg...', 'wg......']);
   SPR.wingR = [wing, flipV(wing)];
   SPR.wingL = SPR.wingR.map(flipH);

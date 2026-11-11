@@ -1,6 +1,16 @@
 // Chests, rescuable Bobs, particles.
 'use strict';
 
+// Chest contents: what each item gives, its toast, and the icon (an SPR name) that pops out
+const LOOT = {
+  sword: { icon: 'swordIcon', toast: 'YOU FOUND A SWORD! 2X DAMAGE, LONGER REACH', give: p => { p.sword = true; } },
+  armor: { icon: 'shield', toast: `ARMOR! HALF DAMAGE FOR ${CFG.ARMOR_HITS} HITS`, give: p => { p.armor = CFG.ARMOR_HITS; } },
+  goldShovel: { icon: 'goldShovelIcon', toast: 'GOLDEN SHOVEL! DIG TWICE AS FAST', give: p => { p.goldShovel = true; } },
+  juice: { icon: 'juice', toast: 'JUMPING JUICE! JUMP TWICE AS HIGH', give: p => { p.juice = true; } },
+  shoes: { icon: 'shoes', toast: 'LIGHT-UP SHOES! RUN 1.5X AS FAST', give: p => { p.shoes = true; } },
+  health: { icon: 'potion', toast: '+1 HEART', sfx: 'heal', give: p => { p.health = Math.min(CFG.MAX_HEALTH, p.health + CFG.HEAL); } },
+};
+
 class Chest {
   constructor(tx, ty, item) {
     this.w = 14; this.h = 12;
@@ -19,25 +29,18 @@ class Chest {
     this.open = true;
     g.sfx('chest');
     g.burst(this.x + 7, this.y, ['#f8c020', '#fce890', '#fcfcfc'], 10, 1.6);
-    if (this.item === 'sword') {
-      p.sword = true;
-      g.toast('YOU FOUND A SWORD! 2X DAMAGE, LONGER REACH');
-    } else if (this.item === 'armor') {
-      p.armor = CFG.ARMOR_HITS;
-      g.toast(`ARMOR! HALF DAMAGE FOR ${CFG.ARMOR_HITS} HITS`);
-    } else {
-      p.health = Math.min(CFG.MAX_HEALTH, p.health + CFG.HEAL);
-      g.toast('+1 HEART');
-      g.sfx('heal');
-    }
+    const loot = LOOT[this.item] || LOOT.health;
+    loot.give(p);
+    g.toast(loot.toast);
+    if (loot.sfx) g.sfx(loot.sfx);
   }
   draw(ctx, cam) {
     const x = Math.round(this.x - 1 - cam.x), y = Math.round(this.y - cam.y);
     ctx.drawImage(this.open ? SPR.chestOpen : SPR.chest, x, y);
     if (this.open && this.popT < 60) {
-      const icon = this.item === 'sword' ? SPR.swordIcon : this.item === 'armor' ? SPR.shield : SPR.potion;
+      const icon = SPR[(LOOT[this.item] || LOOT.health).icon];
       const rise = Math.min(this.popT, 20);
-      if (this.popT < 50 || this.popT % 4 < 2) ctx.drawImage(icon, x + 4, y - 6 - rise);
+      if (this.popT < 50 || this.popT % 4 < 2) ctx.drawImage(icon, x + ((16 - icon.width) >> 1), y - 6 - rise);
     }
   }
 }

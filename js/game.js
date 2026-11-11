@@ -292,7 +292,7 @@ const Game = {
       else this.teleport(c.cx, c.y0 - 3);
     }
     if (Input.pressed('dbg4')) { this.rescueAll(); this.sealTimer = 0; this.world.unseal(); this.teleport(c.x0 + 2, c.y1); }
-    if (Input.pressed('dbg5')) { p.sword = true; p.armor = CFG.ARMOR_HITS; p.inv.dirt += 50; p.inv.stone += 50; p.health = CFG.MAX_HEALTH; }
+    if (Input.pressed('dbg5')) { p.sword = true; p.armor = CFG.ARMOR_HITS; p.goldShovel = p.juice = p.shoes = true; p.inv.dirt += 50; p.inv.stone += 50; p.health = CFG.MAX_HEALTH; }
     if (Input.pressed('dbg6')) this.rescueAll();
   },
 
@@ -366,7 +366,7 @@ const Game = {
     // Dig cracks
     if (p.dig) {
       const t = world.get(p.dig.x, p.dig.y);
-      const stage = Math.min(2, Math.floor(p.dig.p / (DIG_TIME[t] || 10) * 3));
+      const stage = Math.min(2, Math.floor(p.dig.p / (p.digTime(t) || 10) * 3));
       ctx.drawImage(SPR.cracks[stage], p.dig.x * TILE - cam.x, p.dig.y * TILE - cam.y);
     }
 
@@ -395,15 +395,26 @@ const Game = {
     if (p.iframes > 0 && Math.floor(p.iframes / 3) % 2) return;
     ctx.drawImage(p.facing > 0 ? f.r : f.l, x, y);
 
+    // Light-up shoes: a sole under each foot, flashing colors while he runs
+    if (p.shoes) {
+      const lights = ['#e83018', '#90e870', '#48c8f0', '#f8c020'];
+      const moving = Math.abs(p.vx) > 0.2;
+      [3, 12].forEach((sx, i) => {
+        ctx.fillStyle = moving ? lights[(Math.floor(this.frame / 4) + i * 2) % 4] : '#fcfcfc';
+        ctx.fillRect(x + sx, y + BOB_H - 1 - f.lift[i], 7, 1);
+      });
+    }
+
     // Shovel while digging
     if (p.digging && p.dig) {
       const j = (Math.floor(this.frame / 3) % 2) * 2;
       const pcx = Math.round(p.cx - cam.x), py = Math.round(p.y - cam.y);
+      const S = p.goldShovel ? SPR.goldShovel : SPR.plainShovel;
       if (p.dig.dir === 'side') {
-        if (p.facing > 0) ctx.drawImage(SPR.shovel, Math.round(p.x + p.w - 4 - cam.x) + j, py + 9);
-        else ctx.drawImage(SPR.shovelL, Math.round(p.x - 8 - cam.x) - j, py + 9);
-      } else if (p.dig.dir === 'down') ctx.drawImage(SPR.shovelDown, pcx - 2, py + p.h - 6 + j);
-      else ctx.drawImage(SPR.shovelUp, pcx - 2, py - 10 - j);
+        if (p.facing > 0) ctx.drawImage(S.r, Math.round(p.x + p.w - 4 - cam.x) + j, py + 9);
+        else ctx.drawImage(S.l, Math.round(p.x - 8 - cam.x) - j, py + 9);
+      } else if (p.dig.dir === 'down') ctx.drawImage(S.down, pcx - 2, py + p.h - 6 + j);
+      else ctx.drawImage(S.up, pcx - 2, py - 10 - j);
     }
 
     // Fist / sword

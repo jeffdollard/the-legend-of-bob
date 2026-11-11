@@ -35,7 +35,7 @@ const CFG = {
   TUNNELS_TARGET: 4,
   SURFACE_BOTS: 10,
   TUNNEL_BOTS: 2,        // per tunnel
-  CHESTS_PER_TUNNEL: 2,
+  CHESTS_PER_TUNNEL: 3,
   REVEAL_RADIUS: 12,     // min flood-fill reveal half-size (tiles); grows to cover the view
   REVEAL_MARGIN: 4,      // extra tiles past the view edge (camera lag)
 
@@ -51,6 +51,11 @@ const CFG = {
   MAX_FALL: 6,
   COYOTE: 6, JUMP_BUFFER: 6,
   CLIMB_SPEED: 1.2,      // climbing 1-wide shafts (hold ↑)
+
+  // Powerups (from chests, kept until death)
+  GOLD_SHOVEL_DIG: 2,    // golden shovel: dig speed multiplier
+  JUICE_JUMP_V: 6.05,    // jumping juice: jump velocity for a 2x (80px, 5 block) apex
+  SHOES_SPEED: 1.5,      // light-up shoes: multiplies top speed, acceleration and ground friction
 
   // Health is in quarter-hearts: 3 hearts = 12
   MAX_HEALTH: 12,
@@ -70,6 +75,9 @@ const CFG = {
   BOSS_W: 32, BOSS_H: 48,
   WEAK_SPOT: 8,          // weak spot square size, in the arch between the boss's legs
 };
+
+// Chest contents in priority order (a world with fewer chests drops the tail); extra chests hold health
+const CHEST_ITEMS = ['sword', 'goldShovel', 'juice', 'shoes', 'armor', 'health', 'armor'];
 
 // Touch controls (phones/tablets). Sizes are CSS px; Touch.layout converts them to game px.
 const TOUCH = {

@@ -1,7 +1,8 @@
 // node tools/test-physics.js
 // Runs the real Player code against a test platform and checks:
 //  jump apex (full = 2.5 blocks), short hop, 2-block ledge climbable / 3-block not,
-//  dig down a 1-wide shaft, dig sideways (2 rows), place stairs, pillar up, bridge.
+//  dig down a 1-wide shaft, dig sideways (2 rows), place stairs, pillar up, bridge,
+//  powerups (golden shovel 2x dig, jumping juice 2x jump, light-up shoes 1.5x speed).
 'use strict';
 const { loadGame } = require('./load');
 const G = loadGame(['config.js', 'rng.js', 'worldgen.js', 'world.js', 'physics.js', 'input.js', 'player.js'],
@@ -156,6 +157,59 @@ const onSurface = p => p.onGround && Math.abs(p.y + p.h - surfaceFeet) < 0.5;
   const p = new Player(30, -14); settle(p, g);
   run(p, g, 120, { up: true });
   check(p.tileY() === -14, '2-wide shaft is not climbable');
+}
+
+// ---- Powerups ----
+// Jumping juice: full jump apex doubles to 80px (5 blocks); a 4-block ledge is now jumpable
+{
+  const g = fakeGame(arena());
+  const p = new Player(20, -21); settle(p, g); p.juice = true;
+  const ground = p.y + p.h;
+  let minBottom = ground;
+  Input.clear(); Input.tap('jump'); Input.hold('jump', true);
+  for (let i = 0; i < 90; i++) { Input.beginStep(); Input.held.jump = true; p.update(g); minBottom = Math.min(minBottom, p.y + p.h); }
+  const apex = ground - minBottom;
+  check(Math.abs(apex - 80) <= 1.5, `jumping juice apex ${apex.toFixed(1)}px (target 80 = 2x)`);
+
+  const w = arena();
+  for (let x = 30; x <= 40; x++) for (let k = 1; k <= 4; k++) w.set(x, -20 - k, T.STONE);
+  const g2 = fakeGame(w);
+  const p2 = new Player(25, -21); settle(p2, g2); p2.juice = true;
+  for (let i = 0; i < 120; i++) {
+    Input.clear(); Input.hold('right', true);
+    if (i % 40 === 5) Input.tap('jump');
+    Input.held.jump = true;
+    Input.beginStep(); p2.update(g2);
+  }
+  check(p2.x > 30 * TILE && p2.y + p2.h <= -24 * TILE + 0.5, 'jumping juice clears a 4-block ledge');
+}
+// Light-up shoes: top speed 1.5x
+{
+  const top = shoes => {
+    const g = fakeGame(arena());
+    const p = new Player(20, -21); settle(p, g); p.shoes = shoes;
+    let v = 0;
+    for (let i = 0; i < 60; i++) { Input.clear(); Input.hold('right', true); Input.beginStep(); p.update(g); v = Math.max(v, p.vx); }
+    return v;
+  };
+  const base = top(false), fast = top(true);
+  check(Math.abs(fast / base - 1.5) < 0.02, `light-up shoes top speed ${fast.toFixed(2)} vs ${base.toFixed(2)} (1.5x)`);
+}
+// Golden shovel: about half the frames per dirt and stone block
+{
+  const framesFor = (tile, gold) => {
+    const w = arena();
+    for (let y = -22; y <= -21; y++) w.set(23, y, tile);
+    const g = fakeGame(w);
+    const p = new Player(22, -21); settle(p, g); p.facing = 1; p.goldShovel = gold;
+    let n = 0;
+    while (w.solid(23, -21) && n < 200) { Input.clear(); Input.hold('dig', true); Input.beginStep(); p.update(g); n++; }
+    return n;
+  };
+  for (const [tile, name] of [[T.DIRT, 'dirt'], [T.STONE, 'stone']]) {
+    const base = framesFor(tile, false), gold = framesFor(tile, true);
+    check(gold <= Math.ceil(base / 2), `golden shovel digs ${name} in ${gold} frames vs ${base}`);
+  }
 }
 
 console.log(fails ? `\n${fails} FAILED` : '\nall physics checks passed');

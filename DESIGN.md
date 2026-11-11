@@ -10,7 +10,7 @@ Rescue **Bob 2** (above ground) and **Bob 3** (in an underground tunnel), then f
 - Surface hills; dirt layer, then stone with dirt pockets and noise caves.
 - 3–4 hidden tunnels run from the surface to the boss cave (60–80 rows down). Their entrances are covered by **golden grass** plus one dirt row; dig through to find them. Tunnels that touch merge.
 - Underground air stays disguised as solid ground until Bob reaches it (flood-fill reveal).
-- Bob 2 stands on a stone mesa that is too tall to jump onto, so you build stairs or dig up through it. Bob 3 waits in a small room partway along one tunnel.
+- Bob 2 stands on a stone mesa that is too tall to jump onto, so you build stairs or dig up through it. With jumping juice he can jump straight up onto it. Bob 3 waits in a small room partway along one tunnel.
 - The boss cave is walled by undiggable **seal** blocks. When both Bobs are saved, the door blocks become air and the rest of the seal turns to stone.
 
 ## Bob
@@ -24,9 +24,14 @@ Rescue **Bob 2** (above ground) and **Bob 3** (in an underground tunnel), then f
 - **Q** switches material.
 
 ## Items (chests in tunnels)
-- **Sword**: 2 damage and 1.5-block reach. Every world has one.
+About 3 chests per tunnel. Every world has the sword, one of each powerup, 1 armor and 1 health; bigger worlds add a second armor and more health.
+- **Sword**: 2 damage and 1.5-block reach.
 - **Armor**: halves damage and breaks after 10 hits. Up to 2 per world.
 - **Health**: +1 heart, capped at 3.
+- **Golden shovel** (powerup): digs twice as fast. It shows gold while he digs.
+- **Jumping juice** (powerup): jumps twice as high (5 blocks at full hold).
+- **Light-up shoes** (powerup): runs 1.5x as fast. The soles flash while he runs.
+- Powerups last until death and show as icons in the HUD.
 
 ## Enemies
 - **Bob-bot**: dies to 1 punch. Patrols and turns at walls and ledges; chases when Bob is near and hops 1-block steps. Contact costs ½ heart.
@@ -45,9 +50,8 @@ Drawn from the sketches (in code, `js/sprites.js`):
 - Mute: M, or click the speaker in the top-right corner.
 
 ## Death
-Restart the level: same world, terrain reset, inventory lost (materials, sword, armor), rescues reset. A new world comes only from the title screen.
+Restart the level: same world, terrain reset, inventory lost (materials, sword, armor, powerups), rescues reset. A new world comes only from the title screen.
 
 ## Later / open
 - More enemy types later. The bob-bot is the only enemy for now.
 - Tile art (grass, dirt, stone) is still placeholder; no sketches yet.
-- GitHub Pages hosting is undecided. It makes the repo public, so it needs Jeff's explicit yes.

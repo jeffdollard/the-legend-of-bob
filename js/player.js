@@ -13,6 +13,9 @@ class Player {
     this.health = CFG.MAX_HEALTH;
     this.armor = 0;              // hits remaining (0 = no armor)
     this.sword = false;
+    this.goldShovel = false;     // powerups: kept until death
+    this.juice = false;
+    this.shoes = false;
     this.inv = { dirt: 0, stone: 0 };
     this.matIdx = 0;
     this.coyote = 0; this.jumpBuf = 0;
@@ -29,6 +32,8 @@ class Player {
   get cx() { return this.x + this.w / 2; }
   get cy() { return this.y + this.h / 2; }
   get material() { return MATERIALS[this.matIdx]; }
+  get speedMul() { return this.shoes ? CFG.SHOES_SPEED : 1; }
+  digTime(tile) { return Math.ceil(DIG_TIME[tile] / (this.goldShovel ? CFG.GOLD_SHOVEL_DIG : 1)); }
   tileX() { return Math.floor(this.cx / TILE); }
   tileY() { return Math.floor((this.y + this.h - 1) / TILE); }
 
@@ -163,23 +168,25 @@ class Player {
       else { ax = 0; this.vx = 0; }
     }
 
+    const mul = this.speedMul, maxSpeed = CFG.MAX_SPEED * mul;
     if (ax !== 0) {
-      const acc = this.onGround ? CFG.ACCEL_GROUND : CFG.ACCEL_AIR;
+      const acc = (this.onGround ? CFG.ACCEL_GROUND : CFG.ACCEL_AIR) * mul;
       if (Math.sign(this.vx) === -ax && this.onGround) this.vx += ax * acc * 2; // skid turn
       else this.vx += ax * acc;
-      if (Math.abs(this.vx) > CFG.MAX_SPEED) this.vx = Math.sign(this.vx) * Math.max(CFG.MAX_SPEED, Math.abs(this.vx) - 0.2);
+      if (Math.abs(this.vx) > maxSpeed) this.vx = Math.sign(this.vx) * Math.max(maxSpeed, Math.abs(this.vx) - 0.2 * mul);
     } else {
-      const f = this.onGround ? CFG.FRICTION_GROUND : CFG.FRICTION_AIR;
+      const f = this.onGround ? CFG.FRICTION_GROUND * mul : CFG.FRICTION_AIR;
       if (Math.abs(this.vx) <= f) this.vx = 0; else this.vx -= Math.sign(this.vx) * f;
     }
 
     // ---- jump ----
     this.coyote = (this.onGround || this.climbing) ? CFG.COYOTE : this.coyote - 1;
     if (this.jumpBuf > 0 && this.coyote > 0 && this.stun <= 0) {
-      this.vy = -CFG.JUMP_V;
+      this.vy = -(this.juice ? CFG.JUICE_JUMP_V : CFG.JUMP_V);
       this.coyote = 0; this.jumpBuf = 0;
       this.climbing = false;
       g.sfx('jump');
+      if (this.juice) g.burst(this.cx, this.y + this.h, ['#90e870', '#fcfcfc', '#3cb030'], 6, 1.2, { up: 0 });
     }
     if (this.jumpBuf > 0) this.jumpBuf--;
     if (this.climbing) {
@@ -223,7 +230,7 @@ class Player {
           this.digging = true;
           this.dig.p++;
           if (this.dig.p % 5 === 1) g.sfx(tile === T.STONE ? 'digStone' : 'dig');
-          if (this.dig.p >= DIG_TIME[tile]) {
+          if (this.dig.p >= this.digTime(tile)) {
             world.set(tgt.x, tgt.y, T.AIR);
             this.inv[DIG_YIELD[tile]]++;
             g.stats.dug++;
