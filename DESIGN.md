@@ -35,7 +35,7 @@ About 3 chests per tunnel. Every world has the sword, one of each powerup, 1 arm
 
 ## Enemies
 - **Bob-bot**: dies to 1 punch. Patrols and turns at walls and ledges; chases when Bob is near and hops 1-block steps. Contact costs ½ heart.
-- **Bob Boss**: 10 HP. Walks, jumps at Bob and throws "BOB" grenades. Grenades explode on terrain or Bob and cost 1 heart; touching the boss costs ½ heart. **Only hits on the glowing weak spot in the arch between his legs count.** The best chance is an uppercut while he jumps over you; a ground punch only reaches it point-blank, and the sword's longer reach makes it easier. Under 5 HP he gets faster and throws doubles.
+- **Bob Boss**: 20 HP. Walks, jumps at Bob and throws "BOB" grenades. Grenades explode on terrain or Bob and cost 1 heart; touching the boss costs ½ heart. **Only hits on the glowing weak spot in the arch between his legs count.** The best chance is an uppercut while he jumps over you; a ground punch only reaches it point-blank, and the sword's longer reach makes it easier. Under 10 HP he gets faster and throws doubles.
 
 ## Art
 Drawn from the sketches (in code, `js/sprites.js`):

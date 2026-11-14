@@ -33,8 +33,8 @@ const CFG = {
   CAVE_DEPTH_MAX: 80,
   CAVE_THRESHOLD: 0.7,   // noise caves: higher = fewer
   TUNNELS_TARGET: 4,
-  SURFACE_BOTS: 10,
-  TUNNEL_BOTS: 2,        // per tunnel
+  SURFACE_BOTS: 20,
+  TUNNEL_BOTS: 4,        // per tunnel
   CHESTS_PER_TUNNEL: 3,
   REVEAL_RADIUS: 12,     // min flood-fill reveal half-size (tiles); grows to cover the view
   REVEAL_MARGIN: 4,      // extra tiles past the view edge (camera lag)
@@ -71,7 +71,7 @@ const CFG = {
   UPPERCUT_REACH: 28, SWORD_UPPERCUT_REACH: 36,   // uppercut reaches higher: the boss is hit from below
   PUNCH_DMG: 1, SWORD_DMG: 2,
   BOT_HP: 1,
-  BOSS_HP: 10,
+  BOSS_HP: 20,
   BOSS_W: 32, BOSS_H: 48,
   WEAK_SPOT: 8,          // weak spot square size, in the arch between the boss's legs
 };
@@ -81,15 +81,15 @@ const CHEST_ITEMS = ['sword', 'goldShovel', 'juice', 'shoes', 'armor', 'health',
 
 // Touch controls (phones/tablets). Sizes are CSS px; Touch.layout converts them to game px.
 const TOUCH = {
-  DPAD_R: 64,            // d-pad radius
+  DPAD_R: 96,            // d-pad radius
   DPAD_HIT: 1.5,         // a touch within this many radii of the center grabs the d-pad
   DPAD_DEAD: 0.2,        // center dead zone, as a fraction of the radius
   DPAD_V_MIN: 35,        // degrees above horizontal where up/down engage (higher = fewer accidental ups)
   DPAD_H_MAX: 60,        // degrees above horizontal where left/right drop out
-  BTN_R: 30,             // action button radius
+  BTN_R: 45,             // action button radius
   BTN_SPREAD: 1.5,       // diamond offset from the cluster center, in button radii
   BTN_HIT: 1.3,          // button hit radius, in button radii
-  SMALL_R: 20,           // SWAP button radius
+  SMALL_R: 30,           // SWAP button radius
   MARGIN: 20,            // from the left/right screen edges
   MARGIN_BOTTOM: 24,     // from the bottom edge (clear of the home indicator)
   CORNER: 44,            // mute/pause corner hit size

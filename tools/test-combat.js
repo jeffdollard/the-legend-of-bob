@@ -72,8 +72,8 @@ function besideBoss(g, gap, lift = 0) {
   g.boss.update = () => {};
   g.player.sword = true;
   let hits = 0;
-  while (g.boss.hp > 0 && hits < 20) { besideBoss(g, 4, 0); punch(g, 'side'); hits++; }
-  check(hits === 5 && g.boss.dying > 0, `sword kills the 10 HP boss in ${hits} hits`);
+  while (g.boss.hp > 0 && hits < 40) { besideBoss(g, 4, 0); punch(g, 'side'); hits++; }
+  check(hits === CFG.BOSS_HP / CFG.SWORD_DMG && g.boss.dying > 0, `sword kills the ${CFG.BOSS_HP} HP boss in ${hits} hits`);
 }
 {
   const g = setup();
